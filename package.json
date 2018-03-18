@@ -1,0 +1,33 @@
+{
+  "name": "tinycare",
+  "version": "1.0.0",
+  "description": "A small package that cares about you.",
+  "main": "index.js",
+  "author": "Eric Adamski <er.adamski@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "prebuild": "yarn test",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-jest": "^23.0.0-alpha.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "flow-bin": "^0.68.0",
+    "jest": "^22.4.2",
+    "prettier": "^1.11.1",
+    "regenerator-runtime": "^0.11.1",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-commonjs": "^9.1.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-uglify": "^3.0.0"
+  },
+  "dependencies": {
+    "rxjs": "^5.5.7"
+  }
+}
