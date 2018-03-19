@@ -8,7 +8,8 @@
   "scripts": {
     "test": "NODE_ENV=test jest",
     "prebuild": "yarn test",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "prepare": "yarn build"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
