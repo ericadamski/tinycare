@@ -5,9 +5,10 @@ import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 import { filter, takeUntil, take } from "rxjs/operators";
 import "rxjs/add/observable/interval";
+import "rxjs/add/operator/do";
 
 const TwitterKeys = [
-  "accessKey",
+  "accessToken",
   "accessSecret",
   "consumerKey",
   "consumerSecret"
@@ -26,8 +27,18 @@ let _breakTaken$;
 let _tweet$;
 let _t;
 
-function initFirst(source$, fn) {
+function dev(fn: func): () => void {
   return function() {
+    return process.env.NODE_ENV === "development" && fn(...arguments);
+  };
+}
+
+const log = dev(console.log);
+
+function initFirst(getSource, fn) {
+  return function() {
+    const source$ = getSource();
+
     if (!source$)
       throw new Error("Please make sure you call tinycare(options) first.");
 
@@ -35,12 +46,14 @@ function initFirst(source$, fn) {
   };
 }
 
-export const emitCanStartTimer = initFirst(_canStartTimer$, v =>
-  _canStartTimer$.next(v)
+export const emitCanStartTimer = initFirst(
+  () => _canStartTimer$,
+  v => _canStartTimer$.next(v)
 );
 
-export const emitBreakTaken = initFirst(_breakTaken$, v =>
-  _breakTaken$.next(v)
+export const emitBreakTaken = initFirst(
+  () => _breakTaken$,
+  v => _breakTaken$.next(v)
 );
 
 function getTweet(): void {
@@ -75,17 +88,30 @@ function timer(time: number): () => Observable<number> {
   const break$ = _breakTaken$.pipe(filter(v => v));
 
   return () => (
-    addSubscription(break$.subscribe(startTimer(time))),
+    log("Starting Timer."),
+    addSubscription(
+      break$.subscribe(() => {
+        log("Break taken.");
+
+        unsubscribe();
+        _canStartTimer$ = undefined;
+        _breakTaken$ = undefined;
+        startTimer(time);
+      })
+    ),
     fetchFromTwitter(Observable.interval(time).pipe(takeUntil(break$)))
   );
 }
 
 function startTimer(time: number): void {
-  unsubscribe();
+  !_breakTaken$ && (_breakTaken$ = new Subject());
   !_canStartTimer$ && (_canStartTimer$ = new Subject());
+
+  log("Can Start Timer?");
 
   addSubscription(
     _canStartTimer$
+      .do(console.log)
       .pipe(filter(v => v))
       .pipe(take(1))
       .subscribe(timer(time))
@@ -117,7 +143,6 @@ export default function tinycare(options: {
   )
     throw new Error("Missing or incorrect Twitter config.");
 
-  !_breakTaken$ && (_breakTaken$ = new Subject());
   !_tweet$ && (_tweet$ = new Subject());
 
   process.env.NODE_ENV !== "test" &&

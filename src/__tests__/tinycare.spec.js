@@ -27,7 +27,7 @@ describe("tinycare", () => {
       expect(() =>
         tinycare({
           twitter: {
-            accessKey: "",
+            accessToken: "",
             accessSecret: "",
             consumerKey: "",
             consumerSecret: ""
